@@ -1,6 +1,6 @@
 #![allow(rustdoc::missing_crate_level_docs)]
 
-use std::{io::BufRead, time::Instant};
+use std::time::Instant;
 
 use egui::ColorImage;
 use image::{

@@ -3,6 +3,14 @@ name = "challenge"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "imageproc"
+path = "src/imageproc/main.rs"
+
+[[bin]]
+name = "opencv"
+path = "src/opencv/main.rs"
+
 [dependencies]
 eframe = "0.31.1"
 egui = "0.31.1"
@@ -10,3 +18,4 @@ image = "0.25.6"
 imageproc = "0.25.0"
 
 nokhwa = { version = "0.10", features = ["input-native", "output-wgpu"] }
+opencv = { version = "0.94.4", features = ["clang-runtime"] }
