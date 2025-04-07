@@ -48,3 +48,7 @@ sudo systemctl start mediamtx
 rustup install nightly
 cargo run --bin opencv
 ```
+
+# Usage example
+
+![example](./example.gif)
