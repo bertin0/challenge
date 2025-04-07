@@ -6,8 +6,8 @@ use std::sync::{
 use opencv::{
     core::*,
     highgui,
-    imgproc::{resize, INTER_AREA},
-    videoio::{self, VideoCaptureTraitConst, CAP_PROP_FRAME_WIDTH, *},
+    imgproc::{INTER_AREA, resize},
+    videoio::{self, CAP_PROP_FRAME_WIDTH, VideoCaptureTraitConst, *},
 };
 
 struct Effect {
@@ -64,7 +64,7 @@ pub fn camera_in() -> Result<(), opencv::Error> {
 
     let vert_flip = Effect::new("Vertical flip", |src, mut dst| flip(&src, &mut dst, 0));
 
-    let scale = Effect::new("Invert", |src, mut dst| {
+    let scale = Effect::new("Scale", |src, mut dst| {
         resize(&src, &mut dst, src.size()? * 2, 0.0, 0.0, INTER_AREA)
     });
 
@@ -76,6 +76,25 @@ pub fn camera_in() -> Result<(), opencv::Error> {
 
     if !cap.is_opened()? {
         return Err(opencv::Error::new(1, "Failed to open camera"));
+    }
+
+    let mut writer = videoio::VideoWriter::new(
+        "appsrc ! videoconvert ! videoscale
+        ! video/x-raw,
+        ! x264enc speed-preset=veryfast tune=zerolatency bitrate=800
+        ! video/x-h264,profile=baseline
+        ! rtspclientsink location=rtsp://localhost:8554/mystream",
+        0,
+        30.0,
+        Size {
+            width: 640,
+            height: 480,
+        },
+        true,
+    )?;
+
+    if !writer.is_opened()? {
+        eprintln!("Could not open GST writer.");
     }
 
     println!("Frame width: {}", cap.get(CAP_PROP_FRAME_WIDTH)?.round());
@@ -98,6 +117,7 @@ pub fn camera_in() -> Result<(), opencv::Error> {
         }
 
         highgui::imshow("video capture", &frame)?;
+        writer.write(&frame)?;
 
         if highgui::wait_key(1 as i32)? == 27 {
             break;
